@@ -1,0 +1,31 @@
+# deps
+node_modules/
+
+# build outputs
+target/
+.next/
+dist/
+.anchor/
+test-ledger/
+
+# zk artifacts (large / locally generated)
+*.ptau
+*.zkey
+circuits/build/
+app/public/zk/*.wasm
+app/public/zk/*.zkey
+
+# env & secrets
+.env
+.env.*
+!.env.example
+relayer-keypair.json
+
+# database
+*.db
+*.db-journal
+
+# misc
+.DS_Store
+*.log
+app/scripts/devnet-demo-holders.json

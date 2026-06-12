@@ -1,0 +1,20 @@
+{
+  "name": "@private-gating/program",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.32.1",
+    "@solana/web3.js": "^1.98.0"
+  },
+  "devDependencies": {
+    "@private-gating/shared": "workspace:*",
+    "@types/node": "^22.10.2",
+    "snarkjs": "^0.7.4",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}
