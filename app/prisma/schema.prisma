@@ -7,5 +7,51 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Phase 1: scaffold only. The off-chain models (Gate, Registrant, Snapshot,
-// SnapshotLeaf) are added in Phase 4 with the snapshot service and API.
+model Gate {
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  label       String
+  description String?
+  gateType    String // tokenBalance | nftCollection | sybilAction
+  target      String // token mint or NFT collection address
+  threshold   String // raw u64 units, as decimal string
+  decimals    Int          @default(0) // for human display of token thresholds
+  operator    String // operator wallet address
+  address     String       @unique // gate PDA address
+  createdAt   DateTime     @default(now())
+  registrants Registrant[]
+  snapshots   Snapshot[]
+}
+
+model Registrant {
+  id         String   @id @default(cuid())
+  gateId     String
+  gate       Gate     @relation(fields: [gateId], references: [id], onDelete: Cascade)
+  wallet     String
+  commitment String // field element, decimal string
+  createdAt  DateTime @default(now())
+
+  @@unique([gateId, wallet])
+}
+
+model Snapshot {
+  id          String         @id @default(cuid())
+  gateId      String
+  gate        Gate           @relation(fields: [gateId], references: [id], onDelete: Cascade)
+  root        String // field element, decimal string
+  memberCount Int
+  takenAt     DateTime       @default(now())
+  leaves      SnapshotLeaf[]
+}
+
+model SnapshotLeaf {
+  id         String   @id @default(cuid())
+  snapshotId String
+  snapshot   Snapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  commitment String // decimal string
+  attribute  String // raw u64, decimal string
+  leafIndex  Int
+
+  @@unique([snapshotId, leafIndex])
+  @@index([snapshotId, commitment])
+}

@@ -1,0 +1,562 @@
+{
+  "address": "HHvAWv65zH5gXBj6qdHQE1YJ3R9KE8wvtkX7pSwoViwZ",
+  "metadata": {
+    "name": "private_gating",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "claim_prize",
+      "docs": [
+        "Claim the prize by proving knowledge of the secret behind the winning",
+        "nullifier; the recipient is bound inside the proof."
+      ],
+      "discriminator": [157, 233, 139, 121, 246, 62, 234, 235],
+      "accounts": [
+        {
+          "name": "gate",
+          "writable": true
+        },
+        {
+          "name": "recipient",
+          "writable": true
+        },
+        {
+          "name": "payer",
+          "docs": ["The relayer — pays the fee only."],
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "proof",
+          "type": {
+            "array": ["u8", 256]
+          }
+        },
+        {
+          "name": "public_signals",
+          "type": {
+            "array": [
+              {
+                "array": ["u8", 32]
+              },
+              4
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "create_gate",
+      "discriminator": [32, 40, 167, 136, 81, 13, 199, 238],
+      "accounts": [
+        {
+          "name": "gate",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [103, 97, 116, 101]
+              },
+              {
+                "kind": "account",
+                "path": "operator"
+              },
+              {
+                "kind": "arg",
+                "path": "label_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "operator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "label_hash",
+          "type": {
+            "array": ["u8", 32]
+          }
+        },
+        {
+          "name": "label",
+          "type": "string"
+        },
+        {
+          "name": "gate_type",
+          "type": {
+            "defined": {
+              "name": "GateType"
+            }
+          }
+        },
+        {
+          "name": "target",
+          "type": "pubkey"
+        },
+        {
+          "name": "threshold",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "draw_winner",
+      "docs": [
+        "Operator selects a winning entry from the consumed nullifiers."
+      ],
+      "discriminator": [250, 103, 118, 147, 219, 235, 169, 220],
+      "accounts": [
+        {
+          "name": "gate",
+          "writable": true
+        },
+        {
+          "name": "operator",
+          "signer": true,
+          "relations": ["gate"]
+        },
+        {
+          "name": "winner",
+          "docs": [
+            "Proof that this nullifier was actually consumed on this gate."
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "publish_root",
+      "docs": ["Publish the snapshot's Merkle root; the gate becomes live."],
+      "discriminator": [50, 189, 35, 212, 180, 100, 87, 25],
+      "accounts": [
+        {
+          "name": "gate",
+          "writable": true
+        },
+        {
+          "name": "operator",
+          "signer": true,
+          "relations": ["gate"]
+        }
+      ],
+      "args": [
+        {
+          "name": "root",
+          "type": {
+            "array": ["u8", 32]
+          }
+        },
+        {
+          "name": "member_count",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "verify_and_pass",
+      "docs": [
+        "Verify a gate proof and consume its nullifier. The only signer is the",
+        "relayer (fee payer); the proof itself is the authorization."
+      ],
+      "discriminator": [46, 204, 180, 101, 190, 155, 215, 69],
+      "accounts": [
+        {
+          "name": "gate",
+          "writable": true
+        },
+        {
+          "name": "nullifier_record",
+          "docs": [
+            "Replay protection: seeded by the proof's own nullifier signal (the",
+            "handler requires nullifier == public_signals[SIG_NULLIFIER])."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [110, 117, 108, 108, 105, 102, 105, 101, 114]
+              },
+              {
+                "kind": "account",
+                "path": "gate"
+              },
+              {
+                "kind": "arg",
+                "path": "nullifier"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payer",
+          "docs": [
+            "The relayer — pays fees and rent; carries no authorization meaning."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "nullifier",
+          "type": {
+            "array": ["u8", 32]
+          }
+        },
+        {
+          "name": "proof",
+          "type": {
+            "array": ["u8", 256]
+          }
+        },
+        {
+          "name": "public_signals",
+          "type": {
+            "array": [
+              {
+                "array": ["u8", 32]
+              },
+              4
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Gate",
+      "discriminator": [13, 25, 212, 153, 150, 57, 225, 171]
+    },
+    {
+      "name": "NullifierRecord",
+      "discriminator": [56, 18, 57, 175, 69, 202, 189, 70]
+    }
+  ],
+  "events": [
+    {
+      "name": "Passed",
+      "discriminator": [119, 108, 155, 248, 118, 13, 176, 41]
+    },
+    {
+      "name": "PrizeClaimed",
+      "discriminator": [213, 150, 192, 76, 199, 33, 212, 38]
+    },
+    {
+      "name": "RootPublished",
+      "discriminator": [231, 234, 14, 142, 140, 65, 122, 203]
+    },
+    {
+      "name": "WinnerDrawn",
+      "discriminator": [213, 103, 5, 118, 145, 75, 146, 120]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "LabelTooLong",
+      "msg": "label exceeds 64 bytes"
+    },
+    {
+      "code": 6001,
+      "name": "LabelHashMismatch",
+      "msg": "label hash does not match label"
+    },
+    {
+      "code": 6002,
+      "name": "NullifierSeedMismatch",
+      "msg": "nullifier seed does not match proof signal"
+    },
+    {
+      "code": 6003,
+      "name": "ZeroThreshold",
+      "msg": "threshold must be positive"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidFieldElement",
+      "msg": "value is not a canonical BN254 field element"
+    },
+    {
+      "code": 6005,
+      "name": "GateNotLive",
+      "msg": "gate has no published snapshot root"
+    },
+    {
+      "code": 6006,
+      "name": "RootMismatch",
+      "msg": "proof root does not match the published snapshot root"
+    },
+    {
+      "code": 6007,
+      "name": "ThresholdMismatch",
+      "msg": "proof threshold does not match the gate threshold"
+    },
+    {
+      "code": 6008,
+      "name": "GateIdMismatch",
+      "msg": "proof is bound to a different gate"
+    },
+    {
+      "code": 6009,
+      "name": "InvalidProof",
+      "msg": "zero-knowledge proof verification failed"
+    },
+    {
+      "code": 6010,
+      "name": "WinnerNotFromGate",
+      "msg": "nullifier record does not belong to this gate"
+    },
+    {
+      "code": 6011,
+      "name": "NotWinningNullifier",
+      "msg": "nullifier is not the drawn winner"
+    },
+    {
+      "code": 6012,
+      "name": "RecipientMismatch",
+      "msg": "recipient does not match the proof binding"
+    },
+    {
+      "code": 6013,
+      "name": "PrizeAlreadyClaimed",
+      "msg": "prize already claimed"
+    },
+    {
+      "code": 6014,
+      "name": "PrizePotEmpty",
+      "msg": "prize pot is empty; fund the gate before claiming"
+    }
+  ],
+  "types": [
+    {
+      "name": "Gate",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "operator",
+            "type": "pubkey"
+          },
+          {
+            "name": "label",
+            "type": "string"
+          },
+          {
+            "name": "gate_type",
+            "type": {
+              "defined": {
+                "name": "GateType"
+              }
+            }
+          },
+          {
+            "name": "target",
+            "type": "pubkey"
+          },
+          {
+            "name": "threshold",
+            "type": "u64"
+          },
+          {
+            "name": "merkle_root",
+            "type": {
+              "array": ["u8", 32]
+            }
+          },
+          {
+            "name": "member_count",
+            "type": "u32"
+          },
+          {
+            "name": "snapshot_ts",
+            "type": "i64"
+          },
+          {
+            "name": "pass_count",
+            "type": "u64"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "GateStatus"
+              }
+            }
+          },
+          {
+            "name": "winning_nullifier",
+            "type": {
+              "option": {
+                "array": ["u8", 32]
+              }
+            }
+          },
+          {
+            "name": "prize_claimed",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GateStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Registering"
+          },
+          {
+            "name": "Live"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GateType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "TokenBalance"
+          },
+          {
+            "name": "NftCollection"
+          },
+          {
+            "name": "SybilAction"
+          }
+        ]
+      }
+    },
+    {
+      "name": "NullifierRecord",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "gate",
+            "type": "pubkey"
+          },
+          {
+            "name": "nullifier",
+            "type": {
+              "array": ["u8", 32]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Passed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "gate",
+            "type": "pubkey"
+          },
+          {
+            "name": "nullifier",
+            "type": {
+              "array": ["u8", 32]
+            }
+          },
+          {
+            "name": "pass_count",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PrizeClaimed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "gate",
+            "type": "pubkey"
+          },
+          {
+            "name": "nullifier",
+            "type": {
+              "array": ["u8", 32]
+            }
+          },
+          {
+            "name": "recipient",
+            "type": "pubkey"
+          },
+          {
+            "name": "lamports",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RootPublished",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "gate",
+            "type": "pubkey"
+          },
+          {
+            "name": "root",
+            "type": {
+              "array": ["u8", 32]
+            }
+          },
+          {
+            "name": "member_count",
+            "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WinnerDrawn",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "gate",
+            "type": "pubkey"
+          },
+          {
+            "name": "nullifier",
+            "type": {
+              "array": ["u8", 32]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
