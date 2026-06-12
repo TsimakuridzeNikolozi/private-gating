@@ -6,14 +6,17 @@
   "scripts": {
     "compile": "bash ./compile.sh",
     "setup": "bash ../scripts/setup.sh",
-    "test": "vitest run"
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@private-gating/shared": "workspace:*",
+    "@types/node": "^22.10.2",
     "circom_tester": "^0.0.20",
     "circomlib": "^2.0.5",
     "circomlibjs": "^0.1.7",
     "snarkjs": "^0.7.4",
+    "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   }
 }

@@ -94,6 +94,9 @@ importers:
       '@private-gating/shared':
         specifier: workspace:*
         version: link:../packages/shared
+      '@types/node':
+        specifier: ^22.10.2
+        version: 22.19.21
       circom_tester:
         specifier: ^0.0.20
         version: 0.0.20
@@ -106,6 +109,9 @@ importers:
       snarkjs:
         specifier: ^0.7.4
         version: 0.7.6
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
       vitest:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.19.21)(lightningcss@1.32.0)(terser@5.48.0)
@@ -6217,7 +6223,7 @@ snapshots:
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 20.19.43
+      '@types/node': 22.19.21
 
   '@types/estree@1.0.9': {}
 
@@ -6257,11 +6263,11 @@ snapshots:
 
   '@types/ws@7.4.7':
     dependencies:
-      '@types/node': 20.19.43
+      '@types/node': 22.19.21
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 20.19.43
+      '@types/node': 22.19.21
 
   '@types/yargs-parser@21.0.3': {}
 
