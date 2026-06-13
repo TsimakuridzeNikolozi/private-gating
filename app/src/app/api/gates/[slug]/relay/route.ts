@@ -88,7 +88,12 @@ export async function POST(
         .preInstructions([budget])
         .rpc();
     }
-    return Response.json({ signature });
+    // The proof verified and the pass landed on-chain, so this caller is a
+    // qualifying member — only now do we hand back the gated content.
+    return Response.json({
+      signature,
+      reward: kind === "pass" ? (gate.reward ?? null) : null,
+    });
   } catch (e) {
     const message = (e as Error).message ?? "transaction failed";
     // Log the raw chain/RPC error server-side; don't echo internals (account

@@ -12,6 +12,7 @@ model Gate {
   slug        String       @unique
   label       String
   description String?
+  reward      String? // members-only content, revealed only after a valid pass
   gateType    String // tokenBalance | nftCollection | sybilAction
   target      String // token mint or NFT collection address
   threshold   String // raw u64 units, as decimal string

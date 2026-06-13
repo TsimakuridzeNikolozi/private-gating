@@ -22,6 +22,7 @@ import {
   type ProofInput,
   registerCommitment,
   relay,
+  revealReward,
 } from "@/lib/client/api";
 import { deriveIdentity, type PrivateIdentity } from "@/lib/client/identity";
 import { proveInWorker } from "@/lib/client/prover";
@@ -49,6 +50,8 @@ export interface GateFlow {
   error: string | null;
   txSignature: string | null;
   nullifierHex: string | null;
+  reward: string | null;
+  revealBusy: boolean;
   isWinner: boolean;
   claimRecipient: string;
   setClaimRecipient: (value: string) => void;
@@ -58,6 +61,7 @@ export interface GateFlow {
   handleDerive: () => void;
   handleRegister: () => void;
   handleProve: () => void;
+  handleReveal: () => void;
   handleClaim: () => void;
 }
 
@@ -79,6 +83,8 @@ export function useGateFlow(slug: string): GateFlow {
   const [error, setError] = useState<string | null>(null);
   const [txSignature, setTxSignature] = useState<string | null>(null);
   const [nullifierHex, setNullifierHex] = useState<string | null>(null);
+  const [reward, setReward] = useState<string | null>(null);
+  const [revealBusy, setRevealBusy] = useState(false);
 
   const [isWinner, setIsWinner] = useState(false);
   const [claimRecipient, setClaimRecipient] = useState("");
@@ -142,6 +148,7 @@ export function useGateFlow(slug: string): GateFlow {
     setIdentityAddress(null);
     setProofInput(null);
     setNullifierHex(null);
+    setReward(null);
     setIsWinner(false);
     setStep("derive");
   }
@@ -234,12 +241,13 @@ export function useGateFlow(slug: string): GateFlow {
         pathIndices: proofInput.pathIndices,
       });
       setStep("relaying");
-      const signature = await relay(slug, {
+      const { signature, reward: unlocked } = await relay(slug, {
         kind: "pass",
         proof: result.proofBytes,
         publicSignals: result.publicSignals,
       });
       setTxSignature(signature);
+      setReward(unlocked);
       setStep("passed");
       toast.success(done, {
         description:
@@ -265,6 +273,26 @@ export function useGateFlow(slug: string): GateFlow {
     }
   };
 
+  const handleReveal = async () => {
+    if (!publicKey || !signMessage) return;
+    setRevealBusy(true);
+    setError(null);
+    try {
+      setReward(await revealReward(slug, publicKey.toBase58(), signMessage));
+    } catch (e) {
+      const message = (e as Error).message ?? "";
+      setError(
+        declineCopy(
+          message,
+          message,
+          "Signature request was declined — nothing was revealed. Sign when you're ready.",
+        ),
+      );
+    } finally {
+      setRevealBusy(false);
+    }
+  };
+
   const handleClaim = async () => {
     if (connectedAsOperator()) return;
     if (!identity || !gate) return;
@@ -283,7 +311,7 @@ export function useGateFlow(slug: string): GateFlow {
         recipientLo: lo.toString(),
         secret: identity.secret.toString(),
       });
-      const signature = await relay(slug, {
+      const { signature } = await relay(slug, {
         kind: "claim",
         proof: result.proofBytes,
         publicSignals: result.publicSignals,
@@ -332,6 +360,8 @@ export function useGateFlow(slug: string): GateFlow {
     error,
     txSignature,
     nullifierHex,
+    reward,
+    revealBusy,
     isWinner,
     claimRecipient,
     setClaimRecipient,
@@ -341,6 +371,7 @@ export function useGateFlow(slug: string): GateFlow {
     handleDerive,
     handleRegister,
     handleProve,
+    handleReveal,
     handleClaim,
   };
 }

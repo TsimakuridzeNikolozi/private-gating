@@ -25,6 +25,9 @@ export function ResultPanel({
   done,
   nullifierHex,
   txSignature,
+  reward,
+  revealBusy,
+  onReveal,
   isWinner,
   claimRecipient,
   setClaimRecipient,
@@ -38,6 +41,9 @@ export function ResultPanel({
   done: string;
   nullifierHex: string | null;
   txSignature: string | null;
+  reward: string | null;
+  revealBusy: boolean;
+  onReveal: () => void;
   isWinner: boolean;
   claimRecipient: string;
   setClaimRecipient: (value: string) => void;
@@ -71,17 +77,12 @@ export function ResultPanel({
                 </p>
               </div>
             ) : (
-              <div className="space-y-2 text-sm">
-                <p className="text-muted-foreground">
-                  Members-only content unlocked:
-                </p>
-                <div className="bg-muted rounded p-3">
-                  🎉 Invite link:{" "}
-                  <span className="text-primary">
-                    discord.gg/private-gating-demo
-                  </span>
-                </div>
-              </div>
+              <UnlockedContent
+                reward={reward}
+                step={step}
+                revealBusy={revealBusy}
+                onReveal={onReveal}
+              />
             )}
             <div className="border-primary/30 bg-primary/10 text-primary/90 flex items-start gap-2 rounded-md border px-3 py-2 text-xs">
               <ShieldCheck className="mt-px size-4 shrink-0" />
@@ -124,6 +125,70 @@ export function ResultPanel({
         </Card>
       )}
     </>
+  );
+}
+
+function isHttpUrl(value: string): boolean {
+  try {
+    const url = new URL(value.trim());
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function UnlockedContent({
+  reward,
+  step,
+  revealBusy,
+  onReveal,
+}: {
+  reward: string | null;
+  step: Step;
+  revealBusy: boolean;
+  onReveal: () => void;
+}) {
+  if (reward) {
+    return (
+      <div className="space-y-2 text-sm">
+        <p className="text-muted-foreground">Members-only content unlocked:</p>
+        <div className="bg-muted rounded p-3 break-words">
+          {isHttpUrl(reward) ? (
+            <a
+              className="text-primary hover:underline"
+              href={reward}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {reward}
+            </a>
+          ) : (
+            <span className="whitespace-pre-wrap">{reward}</span>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (step === "already-passed") {
+    return (
+      <div className="space-y-2 text-sm">
+        <p className="text-muted-foreground">
+          You&apos;ve already unlocked this gate. Re-sign with your wallet to
+          view the members-only content again.
+        </p>
+        <Button size="sm" disabled={revealBusy} onClick={onReveal}>
+          {revealBusy && <Loader2 className="animate-spin" />}
+          {revealBusy ? "Revealing…" : "Show members-only content"}
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <p className="text-muted-foreground text-sm">
+      You qualify. The operator hasn&apos;t attached any content to this gate.
+    </p>
   );
 }
 

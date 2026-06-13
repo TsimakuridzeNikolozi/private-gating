@@ -50,7 +50,10 @@ export interface CreateGateForm {
   setTarget: (value: string) => void;
   threshold: string;
   setThreshold: (value: string) => void;
+  reward: string;
+  setReward: (value: string) => void;
   isNft: boolean;
+  isSybil: boolean;
   connected: boolean;
   busy: boolean;
   error: string | null;
@@ -70,10 +73,12 @@ export function useCreateGate(): CreateGateForm {
   const [description, setDescription] = useState("");
   const [target, setTarget] = useState("");
   const [threshold, setThreshold] = useState("1");
+  const [reward, setReward] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isNft = kind === "nftCollection";
+  const isSybil = kind === "sybilAction";
 
   const submit = async () => {
     if (!program || !publicKey || !signMessage)
@@ -114,6 +119,7 @@ export function useCreateGate(): CreateGateForm {
       const { slug } = await createGateMetadata({
         address: gate.toBase58(),
         description: description.trim() || undefined,
+        reward: isSybil ? undefined : reward.trim() || undefined,
         decimals,
         wallet: publicKey.toBase58(),
         auth,
@@ -145,7 +151,10 @@ export function useCreateGate(): CreateGateForm {
     setTarget,
     threshold,
     setThreshold,
+    reward,
+    setReward,
     isNft,
+    isSybil,
     connected,
     busy,
     error,

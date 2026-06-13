@@ -43,17 +43,19 @@ export async function listGates(
 export async function createGateMetadata(params: {
   address: string;
   description?: string;
+  reward?: string;
   decimals: number;
   wallet: string;
   auth: SignedAuth;
 }): Promise<{ slug: string }> {
-  const { address, description, decimals, wallet, auth } = params;
+  const { address, description, reward, decimals, wallet, auth } = params;
   const res = await fetch("/api/gates", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
       address,
       description,
+      reward,
       decimals,
       wallet,
       timestamp: auth.timestamp,

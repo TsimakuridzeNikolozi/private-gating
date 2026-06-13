@@ -178,6 +178,9 @@ export function GateView({ slug }: { slug: string }) {
             done={done}
             nullifierHex={flow.nullifierHex}
             txSignature={flow.txSignature}
+            reward={flow.reward}
+            revealBusy={flow.revealBusy}
+            onReveal={flow.handleReveal}
             isWinner={flow.isWinner}
             claimRecipient={flow.claimRecipient}
             setClaimRecipient={flow.setClaimRecipient}

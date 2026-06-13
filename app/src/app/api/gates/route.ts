@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
   const body = await readJsonBody<{
     address?: string;
     description?: string;
+    reward?: string;
     decimals?: number;
     wallet?: string;
     timestamp?: number;
@@ -90,13 +91,19 @@ export async function POST(request: NextRequest) {
   for (let i = 2; await db.gate.findUnique({ where: { slug } }); i++)
     slug = `${base}-${i}`;
 
+  const reward = body.reward?.trim() ? body.reward.trim().slice(0, 1000) : null;
+
   const gate = await db.gate.upsert({
     where: { address: address.toBase58() },
-    update: { description: body.description ?? undefined },
+    update: {
+      description: body.description ?? undefined,
+      reward: reward ?? undefined,
+    },
     create: {
       slug,
       label: onChain.label,
       description: body.description ?? null,
+      reward,
       gateType,
       target: onChain.target.toBase58(),
       threshold: onChain.threshold.toString(),
@@ -114,6 +121,8 @@ export async function GET(request: NextRequest) {
   const gates = await db.gate.findMany({
     where: operator ? { operator } : undefined,
     orderBy: { createdAt: "desc" },
+    // reward is the gated content; never expose it on a public listing
+    omit: { reward: true },
     include: {
       _count: { select: { registrants: true } },
       snapshots: { orderBy: { takenAt: "desc" }, take: 1 },

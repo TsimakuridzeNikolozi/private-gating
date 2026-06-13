@@ -8,6 +8,9 @@ skip-lint = false
 [programs.localnet]
 private_gating = "HHvAWv65zH5gXBj6qdHQE1YJ3R9KE8wvtkX7pSwoViwZ"
 
+[programs.devnet]
+private_gating = "HHvAWv65zH5gXBj6qdHQE1YJ3R9KE8wvtkX7pSwoViwZ"
+
 [registry]
 url = "https://api.apr.dev"
 

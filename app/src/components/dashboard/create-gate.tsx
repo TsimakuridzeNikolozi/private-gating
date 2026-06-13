@@ -85,7 +85,20 @@ export function CreateGate() {
               onChange={(e) => form.setThreshold(e.target.value)}
             />
           </Field>
-          {form.kind === "sybilAction" && (
+          {!form.isSybil && (
+            <Field
+              label="Unlock content (revealed only after a successful pass)"
+              hint="A link or short message. Holders see it only once they've proven they qualify; it's never served from the public gate page."
+            >
+              <Input
+                value={form.reward}
+                onChange={(e) => form.setReward(e.target.value)}
+                placeholder="e.g. https://discord.gg/your-invite"
+                maxLength={1000}
+              />
+            </Field>
+          )}
+          {form.isSybil && (
             <p className="text-muted-foreground text-xs">
               Success records a one-time entry per member. Fund the gate address
               with SOL afterwards if the entries compete for a prize.

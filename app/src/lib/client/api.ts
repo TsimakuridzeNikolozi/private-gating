@@ -109,7 +109,7 @@ export async function relay(
     publicSignals: number[][];
     recipient?: string;
   },
-): Promise<string> {
+): Promise<{ signature: string; reward: string | null }> {
   const res = await fetch(`/api/gates/${slug}/relay`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -117,7 +117,31 @@ export async function relay(
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json.error ?? "relay failed");
-  return json.signature as string;
+  return {
+    signature: json.signature as string,
+    reward: (json.reward ?? null) as string | null,
+  };
+}
+
+/** Re-fetch a gate's unlock content for a member who already passed. */
+export async function revealReward(
+  slug: string,
+  wallet: string,
+  signMessage: (message: Uint8Array) => Promise<Uint8Array>,
+): Promise<string | null> {
+  const timestamp = Math.floor(Date.now() / 1000);
+  const message = `private-gating:reveal:${slug}:${timestamp}`;
+  const signature = bs58.encode(
+    await signMessage(new TextEncoder().encode(message)),
+  );
+  const res = await fetch(`/api/gates/${slug}/reward`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ wallet, timestamp, signature }),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error ?? "could not reveal content");
+  return (json.reward ?? null) as string | null;
 }
 
 export function nullifierPdaClient(
