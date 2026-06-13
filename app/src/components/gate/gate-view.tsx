@@ -12,7 +12,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { explorerAddressUrl } from "@/lib/client/api";
+import { cn, shortenAddress } from "@/lib/utils";
 import { ContextBar } from "./context-bar";
 import { FlowPanel } from "./flow-panel";
 import { ResultPanel } from "./result-card";
@@ -93,6 +94,20 @@ export function GateView({ slug }: { slug: string }) {
           <CardTitle className="text-lg">{requirementText(gate)}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+            <span className="text-muted-foreground">
+              {gate.gateType === "nftCollection" ? "Collection" : "Token mint"}
+            </span>
+            <a
+              href={explorerAddressUrl(gate.target)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-foreground hover:text-primary font-mono hover:underline"
+              title={gate.target}
+            >
+              {shortenAddress(gate.target)}
+            </a>
+          </div>
           <p className="text-muted-foreground text-sm">
             This check is zero-knowledge: the gate never sees your wallet, your
             balance, or which asset you hold — only a proof that you qualify.

@@ -6,7 +6,6 @@ import idl from "@/lib/idl/private_gating.json";
 
 export const PROGRAM_ID = new PublicKey((idl as { address: string }).address);
 
-/** Configured Solana RPC endpoint (falls back to a local validator). */
 export const RPC_URL =
   process.env.NEXT_PUBLIC_SOLANA_RPC_URL ?? "http://127.0.0.1:8899";
 
@@ -144,6 +143,12 @@ export function explorerTxUrl(signature: string): string {
   if (RPC_URL.includes("devnet"))
     return `https://explorer.solana.com/tx/${signature}?cluster=devnet`;
   return `https://explorer.solana.com/tx/${signature}?cluster=custom&customUrl=${encodeURIComponent(RPC_URL)}`;
+}
+
+export function explorerAddressUrl(address: string): string {
+  if (RPC_URL.includes("devnet"))
+    return `https://explorer.solana.com/address/${address}?cluster=devnet`;
+  return `https://explorer.solana.com/address/${address}?cluster=custom&customUrl=${encodeURIComponent(RPC_URL)}`;
 }
 
 /** Human display of a raw threshold given mint decimals. */
