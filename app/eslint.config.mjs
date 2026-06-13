@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Static assets: vendored snarkjs bundle and the plain-JS prover worker.
+    "public/**",
   ]),
 ]);
 
